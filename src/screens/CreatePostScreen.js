@@ -8,6 +8,9 @@ import {
   Button,
   KeyboardAvoidingView,
 } from "react-native";
+import { Entypo } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import { useNavigation } from "@react-navigation/native";
 
 const user = {
   id: "u1",
@@ -17,9 +20,26 @@ const user = {
 };
 
 export default function CreatePostScreen() {
+  const navigation = useNavigation();
   const [description, setDescription] = useState("");
+  const [image, setImage] = useState(null);
   const onSubmit = () => {
-    console.warn("On Submit", description);
+    setDescription("");
+    navigation.goBack();
+  };
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    console.log(result);
+
+    if (!result.canceled) {
+      setImage(result.uri);
+    }
   };
   return (
     <KeyboardAvoidingView
@@ -29,8 +49,15 @@ export default function CreatePostScreen() {
       keyboardVerticalOffset={150}
     >
       <View style={styles.header}>
-        <Image source={{ uri: user.image }} style={styles.image} />
+        <Image source={{ uri: user.image }} style={styles.profileImage} />
         <Text style={styles.name}>{user.name}</Text>
+        <Entypo
+          onPress={pickImage}
+          name="images"
+          size={24}
+          color="limegreen"
+          style={styles.icon}
+        />
       </View>
       <TextInput
         placeholder="What is on your mind?"
@@ -38,6 +65,7 @@ export default function CreatePostScreen() {
         value={description}
         onChangeText={setDescription}
       />
+      <Image source={{ uri: image }} style={styles.image} />
       <View style={styles.buttonContainer}>
         <Button title="Post" onPress={onSubmit} />
       </View>
@@ -59,7 +87,7 @@ const styles = StyleSheet.create({
     width: "100%",
     marginBottom: 10,
   },
-  image: {
+  profileImage: {
     height: 40,
     width: 40,
     borderRadius: 30,
@@ -67,5 +95,12 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginTop: "auto",
+  },
+  image: {
+    width: "100%",
+    aspectRatio: 4 / 3,
+  },
+  icon: {
+    marginLeft: "auto",
   },
 });
